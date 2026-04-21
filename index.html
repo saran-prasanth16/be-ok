@@ -3,19 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>For You 🤍</title>
+    <title>Good Morning ☕</title>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@200;300;400&display=swap');
-
-        :root {
-            --bg-dark: #0a0508;
-            --orb-color: #ffb3c6;
-            --orb-glow: rgba(255, 179, 198, 0.4);
-            --text-light: #f3e5e5;
-            --final-bg: #ffe6ec;
-            --final-text: #5c3a45;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap');
 
         * {
             margin: 0; padding: 0; box-sizing: border-box;
@@ -23,252 +14,374 @@
         }
 
         body, html {
-            background-color: var(--bg-dark);
-            width: 100vw; min-height: 100vh; min-height: 100dvh; 
+            width: 100vw; min-height: 100vh; min-height: 100dvh;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            overflow: hidden; color: var(--text-light);
+            overflow: hidden;
             font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #ffdac6 0%, #ffb5a7 35%, #fcd5ce 70%, #f8edeb 100%);
+            background-size: 300% 300%;
+            animation: sunriseBreathing 15s ease-in-out infinite alternate;
             touch-action: none;
-            transition: background-color 3s ease;
         }
 
-        /* --- 1. INITIAL START SCREEN --- */
-        #start-screen {
+        /* --- THE MINDLESS RIPPLES (Canvas) --- */
+        #ripple-canvas {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 50; cursor: pointer; transition: opacity 1.5s ease;
-        }
-        
-        .start-text {
-            font-family: 'Cormorant Garamond', serif; font-size: clamp(1.5rem, 6vw, 2.2rem);
-            color: var(--orb-color); font-style: italic; margin-bottom: 30px;
-            text-align: center; padding: 0 20px; opacity: 0.8;
+            z-index: 0; pointer-events: none;
         }
 
-        .start-btn {
-            border: 1px solid rgba(255, 179, 198, 0.3); padding: 12px 35px; border-radius: 30px;
-            font-size: 0.75rem; letter-spacing: 4px; text-transform: uppercase; color: var(--orb-color);
-            animation: pulseHint 2s infinite alternate; pointer-events: none;
+        /* --- WARMTH OVERLAY --- */
+        #warmth-overlay {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh;
+            background: radial-gradient(circle at 50% 70%, rgba(255, 150, 100, 0.4) 0%, rgba(255, 100, 80, 0.1) 60%, transparent 100%);
+            opacity: 0; transition: opacity 1.5s ease;
+            pointer-events: none; z-index: 1;
         }
+        body.holding-mug #warmth-overlay { opacity: 1; }
 
-        /* --- 2. THE GROUNDING ORB --- */
-        #hug-container {
-            position: relative; width: 100vw; height: 100dvh;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transition: opacity 2s ease; z-index: 10;
-        }
-
-        .orb-wrapper {
-            position: relative; width: clamp(100px, 30vw, 150px); aspect-ratio: 1/1;
+        /* --- THE ACOUSTIC BLANKET TOGGLE --- */
+        #audio-toggle {
+            position: absolute; top: 5vh; right: 25px;
+            width: 45px; height: 45px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.5);
             display: flex; justify-content: center; align-items: center;
-            margin-bottom: 10vh;
+            font-size: 1.2rem; cursor: pointer; z-index: 30;
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease; opacity: 0.7; color: #8c5a5a;
+        }
+        #audio-toggle.playing { background: rgba(255, 255, 255, 0.6); opacity: 1; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+
+        /* --- THE SILENT COMPANION EMBER --- */
+        #companion-ember {
+            position: absolute; bottom: 5vh; left: 25px;
+            display: flex; align-items: center; gap: 12px; z-index: 5; opacity: 0.8;
+            max-width: 60%; pointer-events: none;
+        }
+        .ember-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: #ffcf70;
+            box-shadow: 0 0 8px #ffcf70, 0 0 15px #ffcf70;
+            animation: pulseEmber 2.5s infinite alternate ease-in-out;
+            flex-shrink: 0;
+        }
+        .ember-text {
+            font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; color: #8c5a5a; 
+            font-style: italic; letter-spacing: 1px; opacity: 0.8;
         }
 
-        /* The glowing light source */
-        #orb {
-            width: 100%; height: 100%; border-radius: 50%;
-            background: radial-gradient(circle at 50% 50%, #ffffff 0%, var(--orb-color) 40%, transparent 80%);
-            box-shadow: 0 0 40px var(--orb-glow), 0 0 80px rgba(255, 179, 198, 0.2);
-            filter: blur(5px);
-            transform: scale(1);
-            /* Transition is handled dynamically in JS for different breath lengths */
-            will-change: transform; 
+        /* --- THE COFFEE SCENE --- */
+        #scene-container {
+            position: relative; width: 100%; max-width: 400px; height: 60vh;
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            z-index: 10; pointer-events: none;
         }
 
-        /* Floating ambient dust around the orb */
-        .dust {
-            position: absolute; border-radius: 50%; background: #fff;
-            opacity: 0; filter: blur(1px); animation: floatDust 4s infinite ease-in-out alternate;
+        #steam-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 70%;
+            pointer-events: none;
         }
 
-        /* --- 3. BREATHE TEXT --- */
-        #breath-text {
-            font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 8vw, 3rem);
-            color: var(--text-light); font-style: italic; letter-spacing: 2px;
-            text-align: center; height: 60px;
-            transition: opacity 1s ease; opacity: 0;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        .steam-word {
+            position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
+            font-family: 'Cormorant Garamond', serif; font-size: clamp(1.2rem, 5vw, 1.6rem);
+            font-style: italic; color: #8c5a5a; white-space: nowrap;
+            opacity: 0; filter: blur(2px);
         }
 
-        .sub-text {
-            position: absolute; bottom: 10vh; font-size: 0.7rem; letter-spacing: 3px;
-            text-transform: uppercase; color: rgba(243, 229, 229, 0.5); font-weight: 300;
+        .mug-container {
+            position: relative; width: 140px; height: 120px; margin-bottom: 5vh;
+            animation: floatMug 6s ease-in-out infinite; cursor: pointer; pointer-events: auto;
         }
 
-        /* --- 4. FINAL HUG SCREEN --- */
-        #final-screen {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background-color: var(--final-bg); z-index: 100;
-            opacity: 0; pointer-events: none; transition: opacity 4s ease;
+        .mug-glow {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 180px; height: 180px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+            opacity: 0; transition: opacity 1s ease; pointer-events: none;
+        }
+        body.holding-mug .mug-glow { opacity: 1; }
+
+        .mug-svg {
+            width: 100%; height: 100%; fill: none; stroke: #ffffff;
+            stroke-width: 4; stroke-linecap: round; stroke-linejoin: round;
+            filter: drop-shadow(0 15px 20px rgba(200, 130, 130, 0.2)); transition: stroke 1s ease;
+        }
+        body.holding-mug .mug-svg { stroke: #fff0eb; filter: drop-shadow(0 15px 30px rgba(255, 150, 100, 0.4)); }
+
+        .coffee-liquid { fill: #c58c85; animation: liquidBreathe 4s ease-in-out infinite alternate; transition: fill 1s ease; }
+        body.holding-mug .coffee-liquid { fill: #b8736a; }
+
+        /* --- THE NO-REPLY MESSAGE (SWIPEABLE) --- */
+        #message-container {
+            width: 90%; max-width: 450px; background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 20px; 
+            padding: 30px 25px; text-align: center; z-index: 20; 
+            box-shadow: 0 20px 40px rgba(200, 130, 130, 0.1);
+            opacity: 0; transform: translateY(20px); animation: fadeUpMessage 2s ease forwards 1s;
+            will-change: transform, opacity; touch-action: pan-y;
         }
 
-        .final-message {
-            font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 7vw, 2.5rem);
-            color: var(--final-text); font-style: italic; text-align: center;
-            line-height: 1.6; padding: 0 30px; opacity: 0; transform: translateY(20px);
-            transition: opacity 3s ease 1s, transform 3s ease 1s;
-        }
-        
-        .final-message.show { opacity: 1; transform: translateY(0); }
+        .message-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.5rem, 6vw, 1.8rem); color: #6d4343; margin-bottom: 15px; font-weight: 600; pointer-events: none; }
+        .message-body { font-size: 0.95rem; line-height: 1.7; color: #5a4040; font-weight: 400; pointer-events: none; }
+        .highlight { font-weight: 600; color: #9c6363; }
+        .swipe-hint { display: block; margin-top: 15px; font-size: 0.7rem; color: #a98888; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; animation: slideHint 2s infinite ease-in-out; }
 
-        /* Animations */
-        @keyframes pulseHint { 0% { box-shadow: 0 0 10px rgba(255, 179, 198, 0); } 100% { box-shadow: 0 0 20px rgba(255, 179, 198, 0.4); } }
-        @keyframes floatDust { 0% { transform: translate(0, 0) scale(0.8); opacity: 0.1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0.6; } }
+        /* --- DANDELION SEEDS --- */
+        .dandelion-seed {
+            position: absolute; width: 4px; height: 4px; background: #fff; border-radius: 50%; 
+            box-shadow: 0 0 8px 2px rgba(255,255,255,0.8); opacity: 0; z-index: 15; pointer-events: none;
+            &::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 1px; height: 10px; background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent); }
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes sunriseBreathing { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        @keyframes floatMug { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes liquidBreathe { 0% { transform: scaleY(0.98); transform-origin: bottom; } 100% { transform: scaleY(1.02); transform-origin: bottom; } }
+        @keyframes fadeUpMessage { to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideHint { 0%, 100% { transform: translateX(0); opacity: 0.5; } 50% { transform: translateX(5px); opacity: 1; } }
+        @keyframes pulseEmber { 0% { opacity: 0.3; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+        @keyframes driftUp { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.9); filter: blur(2px); } 20% { opacity: 0.8; filter: blur(0px); } 80% { opacity: 0.8; filter: blur(1px); } 100% { opacity: 0; transform: translate(var(--drift-x), -150px) scale(1.1); filter: blur(4px); } }
+        @keyframes flyAway { 0% { opacity: 0; transform: translate(0, 0) scale(0.5); } 20% { opacity: 1; transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(1); } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(45deg); } }
     </style>
 </head>
 <body>
 
-    <div id="start-screen">
-        <div class="start-text">I'm right here with you.</div>
-        <div class="start-btn">Tap to hold my hand</div>
+    <audio id="ambient-audio" src="./ambient.mp3" loop preload="auto" crossorigin="anonymous"></audio>
+
+    <canvas id="ripple-canvas"></canvas>
+    <div id="warmth-overlay"></div>
+
+    <button id="audio-toggle">🎵</button>
+
+    <div id="companion-ember">
+        <div class="ember-dot"></div>
+        <div class="ember-text">As long as this light is glowing, I'm thinking of you.</div>
     </div>
 
-    <div id="hug-container">
-        <div class="orb-wrapper" id="orb-wrapper">
-            <div id="orb"></div>
+    <div id="scene-container">
+        <div id="steam-container"></div>
+
+        <div class="mug-container" id="coffee-mug">
+            <div class="mug-glow"></div>
+            <svg class="mug-svg" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 40 20 L 40 100 C 40 120 55 135 75 135 L 125 135 C 145 135 160 120 160 100 L 160 20" fill="rgba(255,255,255,0.3)" />
+                <path d="M 160 40 C 190 40 190 90 160 90" fill="none" />
+                <ellipse cx="100" cy="20" rx="60" ry="12" class="coffee-liquid" />
+                <ellipse cx="100" cy="20" rx="60" ry="12" fill="none" />
+            </svg>
         </div>
-        <div id="breath-text">Match my breathing.</div>
-        <div class="sub-text">Focus on the light</div>
     </div>
 
-    <div id="final-screen">
-        <div class="final-message" id="final-message">
-            Consider this a tight, five-minute-long hug.<br><br>
-            Take a deep breath.<br>You are safe, and you are going to be okay.
+    <div id="message-container">
+        <div class="message-title">Good Morning.</div>
+        <div class="message-body">
+            I know things are incredibly heavy right now, and you don't have to explain a thing.<br><br>
+            Just drink your coffee, take a deep breath, and close this tab. <span class="highlight">No reply expected.</span><br><br>
+            I'm just sitting quietly in your corner today.
+            <span class="swipe-hint">Swipe to let go ⟶</span>
         </div>
     </div>
 
     <script>
-        // DOM Elements
-        const startScreen = document.getElementById('start-screen');
-        const hugContainer = document.getElementById('hug-container');
-        const orb = document.getElementById('orb');
-        const breathText = document.getElementById('breath-text');
-        const orbWrapper = document.getElementById('orb-wrapper');
-        const finalScreen = document.getElementById('final-screen');
-        const finalMessage = document.getElementById('final-message');
+        // ==========================================
+        // 1. MINDLESS RIPPLES (Canvas)
+        // ==========================================
+        const rCanvas = document.getElementById('ripple-canvas');
+        const rctx = rCanvas.getContext('2d');
+        let cw = rCanvas.width = window.innerWidth;
+        let ch = rCanvas.height = window.innerHeight;
+        let ripples = [];
 
-        let hapticInterval;
+        window.addEventListener('resize', () => { cw = rCanvas.width = window.innerWidth; ch = rCanvas.height = window.innerHeight; });
 
-        // Generate ambient floating dust around the orb
-        for(let i=0; i<15; i++) {
-            let dust = document.createElement('div');
-            dust.className = 'dust';
-            dust.style.width = dust.style.height = `${Math.random() * 4 + 2}px`;
-            dust.style.left = `${Math.random() * 100}%`;
-            dust.style.top = `${Math.random() * 100}%`;
-            dust.style.animationDelay = `${Math.random() * 2}s`;
-            dust.style.setProperty('--dx', `${(Math.random() - 0.5) * 40}px`);
-            dust.style.setProperty('--dy', `${(Math.random() - 0.5) * 40}px`);
-            orbWrapper.appendChild(dust);
+        function addRipple(x, y) {
+            ripples.push({ x: x, y: y, r: 0, alpha: 0.4 });
         }
 
-        // --- START THE EXPERIENCE ---
-        startScreen.addEventListener('click', () => {
-            // Initial gentle haptic feedback
-            if(navigator.vibrate) navigator.vibrate([15, 50, 15]);
-
-            startScreen.style.opacity = '0';
-            setTimeout(() => {
-                startScreen.style.display = 'none';
-                hugContainer.style.opacity = '1';
-                
-                // Show intro text, then start cycle
-                breathText.style.opacity = '1';
-                setTimeout(() => {
-                    breathText.style.opacity = '0';
-                    setTimeout(startBreathingCycle, 1000);
-                }, 3500);
-
-            }, 1500);
+        // Track movement across the entire screen
+        window.addEventListener('pointermove', (e) => {
+            // Only drop a ripple every few pixels to avoid lagging the phone
+            if(Math.random() > 0.6) addRipple(e.clientX, e.clientY);
         });
 
-        // --- THE 4-2-6 GROUNDING BREATHING LOGIC ---
-        let cyclesCompleted = 0;
-        const totalCycles = 3; // 3 full deep breaths
-
-        function startBreathingCycle() {
-            if (cyclesCompleted >= totalCycles) {
-                triggerFinalHug();
-                return;
-            }
-
-            // 1. INHALE (4 seconds)
-            changeText("Breathe in...");
-            orb.style.transition = 'transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            orb.style.transform = 'scale(2.8)';
-            startHaptics('inhale');
-
-            // 2. HOLD (2 seconds)
-            setTimeout(() => {
-                changeText("Hold...");
-                stopHaptics();
+        function animateRipples() {
+            rctx.clearRect(0, 0, cw, ch);
+            for (let i = ripples.length - 1; i >= 0; i--) {
+                let rp = ripples[i];
+                rp.r += 1.5; // expansion speed
+                rp.alpha -= 0.008; // fade speed
                 
-                // 3. EXHALE (6 seconds)
-                setTimeout(() => {
-                    changeText("Breathe out...");
-                    orb.style.transition = 'transform 6s cubic-bezier(0.25, 1, 0.5, 1)';
-                    orb.style.transform = 'scale(1)';
-                    startHaptics('exhale');
-
-                    // 4. REST (1.5 seconds) before next cycle
-                    setTimeout(() => {
-                        changeText("");
-                        stopHaptics();
-                        cyclesCompleted++;
-                        
-                        setTimeout(startBreathingCycle, 1500);
-
-                    }, 6000); // Wait for exhale to finish
-                }, 2000); // Wait for hold to finish
-            }, 4000); // Wait for inhale to finish
-        }
-
-        // --- HAPTIC HEARTBEAT SYNCS WITH BREATHING ---
-        function startHaptics(phase) {
-            if (!navigator.vibrate) return;
-            clearInterval(hapticInterval);
-
-            if (phase === 'inhale') {
-                // Quick, uplifting pulses as chest expands
-                hapticInterval = setInterval(() => { navigator.vibrate(10); }, 600);
-            } else if (phase === 'exhale') {
-                // Slower, calming pulses as chest lowers
-                hapticInterval = setInterval(() => { navigator.vibrate(15); }, 1000);
+                if (rp.alpha <= 0) {
+                    ripples.splice(i, 1);
+                    continue;
+                }
+                
+                rctx.beginPath();
+                rctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+                rctx.strokeStyle = `rgba(255, 255, 255, ${rp.alpha})`;
+                rctx.lineWidth = 1;
+                rctx.stroke();
             }
+            requestAnimationFrame(animateRipples);
         }
+        animateRipples();
 
-        function stopHaptics() {
-            clearInterval(hapticInterval);
-        }
+        // ==========================================
+        // 2. THE ACOUSTIC BLANKET (Audio)
+        // ==========================================
+        const audioToggle = document.getElementById('audio-toggle');
+        const ambientAudio = document.getElementById('ambient-audio');
 
-        // --- SMOOTH TEXT CROSSFADING ---
-        function changeText(newText) {
-            breathText.style.opacity = '0';
-            setTimeout(() => {
-                breathText.innerText = newText;
-                if(newText !== "") breathText.style.opacity = '1';
-            }, 600); // Wait for fade out
-        }
+        audioToggle.addEventListener('click', () => {
+            if (ambientAudio.paused) {
+                ambientAudio.play();
+                audioToggle.classList.add('playing');
+                if(navigator.vibrate) navigator.vibrate(10);
+            } else {
+                ambientAudio.pause();
+                audioToggle.classList.remove('playing');
+            }
+        });
 
-        // --- THE FINALE (THE HUG) ---
-        function triggerFinalHug() {
-            // Orb expands infinitely to swallow the screen
-            orb.style.transition = 'transform 4s ease-in';
-            orb.style.transform = 'scale(20)';
+        // ==========================================
+        // 3. STEAM AFFIRMATIONS LOGIC
+        // ==========================================
+        const steamContainer = document.getElementById('steam-container');
+        const affirmations = [
+            "Take your time", "Breathe", "You are safe", "One step at a time", 
+            "I'm right here", "No rush", "You are loved", "It's okay to rest", 
+            "I'm proud of you", "Just breathe"
+        ];
+        let lastIndex = -1;
+
+        function createSteamWord() {
+            let randomIndex;
+            do { randomIndex = Math.floor(Math.random() * affirmations.length); } while (randomIndex === lastIndex);
+            lastIndex = randomIndex;
+
+            const el = document.createElement('div');
+            el.className = 'steam-word';
+            el.innerText = affirmations[randomIndex];
+
+            const driftDirection = (Math.random() - 0.5) * 100; 
+            el.style.setProperty('--drift-x', `calc(-50% + ${driftDirection}px)`);
             
-            // Soft, continuous vibration simulating a warm embrace
-            if(navigator.vibrate) navigator.vibrate([30, 100, 30, 100, 50, 200, 50]);
+            const duration = Math.random() * 3 + 6;
+            el.style.animation = `driftUp ${duration}s ease-in-out forwards`;
 
-            setTimeout(() => {
-                finalScreen.style.opacity = '1';
+            steamContainer.appendChild(el);
+            setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, duration * 1000);
+        }
+
+        setTimeout(createSteamWord, 1000);
+        setInterval(createSteamWord, 4000);
+
+        // ==========================================
+        // 4. TACTILE WARM MUG LOGIC
+        // ==========================================
+        const mug = document.getElementById('coffee-mug');
+        let holdInterval;
+
+        function startMugHold(e) {
+            e.preventDefault(); 
+            document.body.classList.add('holding-mug');
+            if(navigator.vibrate) navigator.vibrate(30);
+
+            holdInterval = setInterval(() => {
+                if(navigator.vibrate) navigator.vibrate(10);
+                if(Math.random() > 0.7) createSteamWord();
+            }, 120);
+        }
+
+        function endMugHold() {
+            document.body.classList.remove('holding-mug');
+            clearInterval(holdInterval);
+        }
+
+        mug.addEventListener('touchstart', startMugHold, {passive: false});
+        mug.addEventListener('mousedown', startMugHold);
+        window.addEventListener('touchend', endMugHold);
+        window.addEventListener('mouseup', endMugHold);
+        window.addEventListener('touchcancel', endMugHold);
+
+        // ==========================================
+        // 5. THE EXHALE SWIPE LOGIC
+        // ==========================================
+        const msgContainer = document.getElementById('message-container');
+        let startX = 0; let currentX = 0; let isDragging = false; let hasSwiped = false;
+
+        function startSwipe(e) {
+            if (hasSwiped) return;
+            isDragging = true;
+            startX = e.touches ? e.touches[0].clientX : e.clientX;
+            msgContainer.style.transition = 'none'; 
+        }
+
+        function dragSwipe(e) {
+            if (!isDragging || hasSwiped) return;
+            currentX = e.touches ? e.touches[0].clientX : e.clientX;
+            let diff = currentX - startX;
+            if (diff < -50) diff = -50; 
+            
+            msgContainer.style.transform = `translateX(${diff}px) translateY(20px) rotate(${diff * 0.05}deg)`;
+            msgContainer.style.opacity = 1 - (Math.abs(diff) / (window.innerWidth * 1.5));
+        }
+
+        function endSwipe() {
+            if (!isDragging || hasSwiped) return;
+            isDragging = false;
+            let diff = currentX - startX;
+
+            if (diff > 100) {
+                hasSwiped = true;
+                msgContainer.style.transition = 'all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                msgContainer.style.transform = `translateX(${window.innerWidth + 100}px) translateY(50px) rotate(20deg)`;
+                msgContainer.style.opacity = '0';
                 
-                setTimeout(() => {
-                    finalMessage.classList.add('show');
-                }, 1000);
+                if(navigator.vibrate) navigator.vibrate([20, 50, 20]);
+                setTimeout(triggerDandelions, 200);
+                setTimeout(() => msgContainer.style.display = 'none', 600);
+            } else {
+                msgContainer.style.transition = 'all 0.4s ease';
+                msgContainer.style.transform = `translateX(0) translateY(0) rotate(0deg)`;
+                msgContainer.style.opacity = '1';
+            }
+        }
 
-            }, 2500); // Trigger mid-expansion
+        msgContainer.addEventListener('touchstart', startSwipe, {passive: true});
+        msgContainer.addEventListener('mousedown', startSwipe);
+        window.addEventListener('touchmove', dragSwipe, {passive: true});
+        window.addEventListener('mousemove', dragSwipe);
+        window.addEventListener('touchend', endSwipe);
+        window.addEventListener('mouseup', endSwipe);
+
+        // ==========================================
+        // 6. DANDELION SEED PARTICLE ENGINE
+        // ==========================================
+        function triggerDandelions() {
+            const rect = msgContainer.getBoundingClientRect();
+            const startY = rect.top + (rect.height / 2);
+            
+            for(let i = 0; i < 40; i++) {
+                let seed = document.createElement('div');
+                seed.className = 'dandelion-seed';
+                
+                seed.style.left = `${10 + Math.random() * 80}%`;
+                seed.style.top = `${startY + (Math.random() * 100 - 50)}px`;
+                
+                const tx = (Math.random() - 0.5) * window.innerWidth * 0.8;
+                const ty = -(Math.random() * window.innerHeight * 0.8 + 200);
+                
+                seed.style.setProperty('--tx', `${tx}px`);
+                seed.style.setProperty('--ty', `${ty}px`);
+                
+                const duration = 3 + Math.random() * 4;
+                seed.style.animation = `flyAway ${duration}s ease-in-out forwards`;
+                seed.style.animationDelay = `${Math.random() * 0.5}s`;
+                
+                document.body.appendChild(seed);
+                setTimeout(() => { if(seed.parentNode) seed.parentNode.removeChild(seed); }, (duration + 1) * 1000);
+            }
         }
     </script>
 </body>
